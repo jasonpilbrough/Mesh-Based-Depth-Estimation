@@ -282,6 +282,13 @@ void sandbox::Mesh_Regulariser::run_logTV( std::vector<DepthFeaturePair> & spars
 
 void sandbox::Mesh_Regulariser::run_logTGV( std::vector<DepthFeaturePair> & sparse_supports_in, const std::vector<Edge> & edges, std::vector<DepthFeaturePair> & sparse_supports_out){
 
+  //TODO
+}
+
+
+
+/*
+
   //auto start = std::chrono::system_clock::now();
 
   float σ = 0.125f;
@@ -394,8 +401,8 @@ for(int j = 0; j < F; j++){
 
 
 
-}
 
+*/
 
 
 /*

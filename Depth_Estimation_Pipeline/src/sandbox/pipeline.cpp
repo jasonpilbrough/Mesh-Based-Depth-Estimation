@@ -97,15 +97,15 @@ sandbox::Pipeline::Pipeline(const std::string & stereo_l_filepath, const std::st
         cv::Mat delaunay_unsmooth_img=img_l.clone();
         delaunay.drawWireframe(params, support_points,triangles,delaunay_unsmooth_img);
 
-        cv::Mat disp_dense_unsmooth, disp_dense_unsmooth_show;
-        disp_dense_unsmooth = cv::Mat(img_l.size().height, img_l.size().width, CV_32FC1, cv::Scalar(0));
-        interpolateMesh(triangles,support_points,disp_dense_unsmooth);
-        disp_dense_unsmooth = (disp_dense_unsmooth / (float)params.NUM_DISPARITIES*params.COLOUR_SCALE) * 255.0f;
-        std::transform(disp_dense_unsmooth.begin<float>(), disp_dense_unsmooth.end<float>(), disp_dense_unsmooth.begin<float>(),
-                   [](float f) -> float { return std::max(0.0f, std::min(f, 255.0f)); }); //clamp between 0 and 255
+        //cv::Mat disp_dense_unsmooth, disp_dense_unsmooth_show;
+        //disp_dense_unsmooth = cv::Mat(img_l.size().height, img_l.size().width, CV_32FC1, cv::Scalar(0));
+        //interpolateMesh(triangles,support_points,disp_dense_unsmooth);
+        //disp_dense_unsmooth = (disp_dense_unsmooth / (float)params.NUM_DISPARITIES*params.COLOUR_SCALE) * 255.0f;
+        //std::transform(disp_dense_unsmooth.begin<float>(), disp_dense_unsmooth.end<float>(), disp_dense_unsmooth.begin<float>(),
+        //           [](float f) -> float { return std::max(0.0f, std::min(f, 255.0f)); }); //clamp between 0 and 255
 
-        disp_dense_unsmooth.convertTo(disp_dense_unsmooth_show, CV_8U);
-        COLOUR_MAP.applyColourMap(disp_dense_unsmooth_show, disp_dense_unsmooth_show);
+        //disp_dense_unsmooth.convertTo(disp_dense_unsmooth_show, CV_8U);
+        //COLOUR_MAP.applyColourMap(disp_dense_unsmooth_show, disp_dense_unsmooth_show);
 
 
 
@@ -113,10 +113,12 @@ sandbox::Pipeline::Pipeline(const std::string & stereo_l_filepath, const std::st
         std::vector<DepthFeaturePair> support_points_reg = support_points;
         std::vector<Edge> edges = delaunay.edges();
 
-        regulariser.run_TV(support_points,edges,support_points_reg);
+
+        //regulariser.run_TV(support_points,edges,support_points_reg);
         //regulariser.run_TGV(support_points,edges,support_points_reg);
-        //regulariser.run_logTV(support_points,edges,support_points_reg);
+        regulariser.run_logTV(support_points,edges,support_points_reg);
         //regulariser.run_logTGV(support_points,edges,support_points_reg);
+
 
 
         cv::Mat delaunay_smooth_img=img_l.clone();
@@ -133,9 +135,9 @@ sandbox::Pipeline::Pipeline(const std::string & stereo_l_filepath, const std::st
                    [&params](float f) -> float { return std::max(0.0f, std::min(f, 255.0f)); }); //clamp between 0 and 255
         disp_dense_smooth_show.convertTo(disp_dense_smooth_show, CV_8U);
         COLOUR_MAP.applyColourMap(disp_dense_smooth_show, disp_dense_smooth_show);
+
+
         t.tock();
-
-
 
         /* ----------------------- PROCESS GROUND TRUTH  ----------------------- */
         cv::Mat img_gnd_show;
@@ -153,16 +155,16 @@ sandbox::Pipeline::Pipeline(const std::string & stereo_l_filepath, const std::st
 
 
 
-        t.draw_timing(disp_dense_smooth_show);
+        t.draw_timing(delaunay_smooth_img);
 
-        imshow("Original Image", img_l);
+        //imshow("Original Image", img_l);
         //imshow("Disparity Map", disp_img_show);
-        imshow("Unsmoothed Depth Map", disp_dense_unsmooth_show);
-        imshow("Unsmoothed Delaunay", delaunay_unsmooth_img );
+        //imshow("Unsmoothed Depth Map", disp_dense_unsmooth_show);
+        //imshow("Unsmoothed Delaunay", delaunay_unsmooth_img );
         imshow("Smoothed Delaunay", delaunay_smooth_img );
-        imshow("Features", support_points_img);
+        //imshow("Features", support_points_img);
         //imshow("Ground Truth", img_gnd_show );
-        imshow("Smoothed Depth Map", disp_dense_smooth_show);
+        //imshow("Smoothed Depth Map", disp_dense_smooth_show);
 
         //Opencv triggers the actual drawing in waitKey(), so the delay is likely to take at least 10-20ms
         char c=(char)cv::waitKey(1);
